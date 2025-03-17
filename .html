@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #007BFF, #FF8C00); /* Blue to Orange */ /* Light background */
+            color: #333; /* Dark text for readability */
+            margin: 0;
+            padding: 20px;
+        }
+
+        #quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .options {
+            margin-bottom: 20px;
+        }
+
+        .options label {
+            display: block;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF; /* Bright blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        #custom-question-container {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #score {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .custom-questions {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .custom-questions h3 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>Quiz</h1>
+        <div id="quiz"></div>
+        <button id="next-button">Next Question</button>
+        <div id="score" style="display: none;"></div>
+
+        <div id="custom-question-container">
+            <h2>Add Your Own Question</h2>
+            <input type="text" id="custom-question" placeholder="Enter your question here" required>
+            <input type="text" id="custom-option1" placeholder="Option 1" required>
+            <input type="text" id="custom-option2" placeholder="Option 2" required>
+            <input type="text" id="custom-option3" placeholder="Option 3" required>
+            <input type="text" id="custom-option4" placeholder="Option 4" required>
+            <input type="text" id="custom-answer" placeholder="Correct Answer" required>
+            <button onclick="addCustomQuestion()">Add Question</button>
+        </div>
+
+        <div class="custom-questions" id="custom-questions-display" style="display: none;">
+            <h3>Your Custom Questions:</h3>
+            <ul id="custom-questions-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+   
+         { question: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Lisbon"], answer: "Paris" },
+            { question: "Who is the current President of the USA?", options: ["Joe Biden", "Donald Trump", "Barack Obama", "George W. Bush"], answer: "Joe Biden" },
+    {
+        question: "What is the capital of the United States?",
+        options: ["New York", "Washington, D.C.", "Los Angeles", "Chicago"],
+        answer: "Washington, D.C."
+    },
+    {
+        question: "Who was the first President of the United States?",
+        options: ["Thomas Jefferson", "George Washington", "Abraham Lincoln", "John Adams"],
+        answer: "George Washington"
+    },
+    {
+        question: "Which political party is represented by the elephant symbol?",
+        options: ["Democratic Party", "Republican Party", "Green Party", "Libertarian Party"],
+        answer: "Republican Party"
+    },
+    {
+        question: "What is the highest court in the United States?",
+        options: ["Court of Appeals", "Supreme Court", "District Court", "Family Court"],
+        answer: "Supreme Court"
+    },
+    {
+        question: "Who is known as the 'Father of the Constitution'?",
+        options: ["Benjamin Franklin", "James Madison", "Alexander Hamilton", "John Jay"],
+        answer: "James Madison"
+    },
+    {
+        question: "Which amendment to the U.S. Constitution abolished slavery?",
+        options: ["13th Amendment", "14th Amendment", "15th Amendment", "16th Amendment"],
+        answer: "13th Amendment"
+    },
+    {
+        question: "What is the primary function of the legislative branch of government?",
+        options: ["Enforce laws", "Interpret laws", "Make laws", "Execute laws"],
+        answer: "Make laws"
+    },
+    {
+        question: "Who was the first female Prime Minister of the United Kingdom?",
+        options: ["Theresa May", "Margaret Thatcher", "Angela Merkel", "Nicola Sturgeon"],
+        answer: "Margaret Thatcher"
+    },
+    {
+        question: "Which country has a parliamentary system of government?",
+        options: ["United States", "France", "Canada", "China"],
+        answer: "Canada"
+    },
+    {
+        question: "What is the term for a political system where power is held by a small group of people?",
+        options: ["Democracy", "Oligarchy", "Monarchy", "Theocracy"],
+        answer: "Oligarchy"
+    },
+    {
+        question: "Who is the current Chancellor of Germany?",
+        options: ["Angela Merkel", "Olaf Scholz", "Frank-Walter Steinmeier", "Armin Laschet"],
+        answer: "Olaf Scholz"
+    },
+    {
+        question: "What is the main purpose of the United Nations?",
+        options: ["Promote trade", "Maintain international peace and security", "Regulate the economy", "Control military actions"],
+        answer: "Maintain international peace and security"
+    },
+    {
+        question: "Which U.S. President issued the Emancipation Proclamation?",
+        options: ["Ulysses S. Grant", "Abraham Lincoln", "Franklin D. Roosevelt", "Theodore Roosevelt"],
+        answer: "Abraham Lincoln"
+    },
+    {
+        question: "What is the political ideology that advocates for social ownership and democratic control of the means of production?",
+        options: ["Capitalism", "Socialism", "Liberalism", "Conservatism"],
+        answer: "Socialism"
+    },
+    {
+        question: "Which amendment granted women the right to vote in the United States?",
+        options: ["19th Amendment", "18th Amendment", "20th Amendment", "21st Amendment"],
+        answer: "19th Amendment"
+    },
+    {
+        question: "What is the term for a government ruled by religious leaders?",
+        options: ["Democracy", "Oligarchy", "Theocracy", "Autocracy"],
+        answer: "Theocracy"
+    },
+    {
+        question: "Who was the first African American President of the United States?",
+        options: ["Colin Powell", "Barack Obama", "Jesse Jackson", "Al Sharpton"],
+        answer: "Barack Obama"
+    },
+    {
+        question: "What is the primary role of the executive branch of government?",
+        options: ["Make laws", "Enforce laws", "Interpret laws", "Review laws"],
+        answer: "Enforce laws"
+    },
+    {
+        question: "Which political movement seeks to reduce government intervention in the economy?",
+        options: ["Liberalism", "Conservatism", "Socialism", "Progressivism"],
+        answer: "Conservatism"
+    },
+    {
+        question: "What is the term for a political system where citizens vote directly on laws and policies?",
+        options: ["Representative democracy", "Direct democracy", "Republic", "Constitutional monarchy"],
+        answer: "Direct democracy"
+    }
+
+];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const quizContainer = document.getElementById('quiz');
+        const nextButton = document.getElementById('next-button');
+        const scoreDisplay = document.getElementById('score');
+        const customQuestionsList = document.getElementById('custom-questions-list');
+        const customQuestionsDisplay = document.getElementById('custom-questions-display');
+
+        function loadQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            quizContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <div class="options">
+                    ${currentQuestion.options.map((option) => `
+                        <label>
+                            <input type="radio" name="option" value="${option}"> ${option}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function addCustomQuestion() {
+            const question = document.getElementById('custom-question').value;
+            const option1 = document.getElementById('custom-option1').value;
+            const option2 = document.getElementById('custom-option2').value;
+            const option3 = document.getElementById('custom-option3').value;
+            const option4 = document.getElementById('custom-option4').value;
+            const answer = document.getElementById('custom-answer').value;
+
+            if (question && option1 && option2 && option3 && option4 && answer) {
+                quizData.push({
+                    question: question,
+                    options: [option1, option2, option3, option4],
+                    answer: answer
+                });
+
+                // Clear the input fields
+                document.getElementById('custom-question').value = '';
+                document.getElementById('custom-option1').value = '';
+                document.getElementById('custom-option2').value = '';
+                document.getElementById('custom-option3').value = '';
+                document.getElementById('custom-option4').value = '';
+                document.getElementById('custom-answer').value = '';
+
+                alert("Question added successfully!");
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function publishQuestions() {
+            customQuestionsList.innerHTML = '';
+            quizData.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${item.question} (Options: ${item.options.join(', ')})`;
+                customQuestionsList.appendChild(li);
+            });
+            customQuestionsDisplay.style.display = 'block';
+        }
+
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            if (selectedOption) {
+                if (selectedOption.value === quizData[currentQuestionIndex].answer) {
+                    score++;
+                }
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) {
+                    loadQuestion();
+                } else {
+                    displayScore();
+                }
+            } else {
+                alert("Please select an answer.");
+            }
+        }
+
+        function displayScore() {
+            quizContainer.innerHTML = '';
+            scoreDisplay.style.display = 'block';
+            scoreDisplay.innerHTML = `You scored ${score} out of ${quizData.length}`;
+        }
+
+        nextButton.addEventListener('click', checkAnswer);
+
+        // Load the first question when the page loads
+        loadQuestion();
+    </script>
+</body>
+</html>
